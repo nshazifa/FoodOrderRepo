@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Tracking</title>
+  <script type="module" src="loadNavbar.js"></script>
+  <script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          document.getElementById("userName").textContent = user.displayName || "User";
+          document.getElementById("userEmail").textContent = user.email;
+          await loadUserDetails(user.uid);
+          await loadOrders(user.uid);
+        }
+      });
+    });
+
+    // the user s phone and address is not displaying !
+    async function loadUserDetails(userId) {
+      try {
+        const userRef = doc(db, `Users/${userId}/Profile`);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          document.getElementById("userPhone").textContent = userData.phone || "Not Available";
+          document.getElementById("userAddress").textContent = userData.address || "Not Available";
+        }
+      } catch (error) {
+        console.error("Error loading user details:", error);
+      }
+    }
+
+    async function loadOrders(userId) {
+      try {
+        const ordersContainer = document.getElementById("ordersContainer");
+        ordersContainer.innerHTML = "";
+
+        const ordersRef = collection(db, `Users/${userId}/Orders`);
+        const ordersSnapshot = await getDocs(ordersRef);
+
+        if (ordersSnapshot.empty) {
+          ordersContainer.innerHTML = "<p>No orders found.</p>";
+          return;
+        }
+
+        let isFirstOrder = true;
+        ordersSnapshot.forEach(async (orderDoc) => {
+          const orderData = orderDoc.data();
+          const orderId = orderDoc.id;
+          const orderElement = document.createElement("div");
+          orderElement.classList.add("order-item");
+          orderElement.innerHTML = `
+                        <button class="order-header" onclick="toggleOrderDetails('${orderId}')">
+                            Order ID: ${orderId} - ₹${orderData.total} (${orderData.status})
+                        </button>
+                        <div class="order-details" id="${orderId}" style="display: ${isFirstOrder ? 'block' : 'none'};">
+                            <ul id="items-${orderId}"></ul>
+                            <p><strong>Total:</strong> ₹${orderData.total}</p>
+                            <p><strong>Payment Method:</strong> <span id="payment-${orderId}"></span></p>
+                        </div>
+                    `;
+          ordersContainer.appendChild(orderElement);
+          isFirstOrder = false;
+
+          await loadOrderItems(userId, orderId);
+          await loadDeliveryInfo(userId, orderId);
+        });
+      } catch (error) {
+        console.error("Error loading orders:", error);
+      }
+    }
+
+    // async function loadDeliveryInfo(userId, orderId) {
+    //   const deliveryRef = doc(db, `Users/${userId}/Orders/${orderId}/DeliveryInfo/Details`);
+    //   const deliverySnap = await getDoc(deliveryRef);
+    //   if (deliverySnap.exists()) {
+    //     const deliveryData = deliverySnap.data();
+    //     document.getElementById(`payment-${orderId}`).textContent = deliveryData.paymentMethod || "Not Specified";
+    //   }
+    // }
+    async function loadDeliveryInfo(userId, orderId) {
+  try {
+    const deliveryRef = doc(db, `Users/${userId}/Orders/${orderId}/DeliveryInfo/Details`);
+    const deliverySnap = await getDoc(deliveryRef);
+
+    if (deliverySnap.exists()) {
+      const deliveryData = deliverySnap.data();
+
+      // Construct full name from first and last name
+      const fullName = `${deliveryData.firstName || ""} ${deliveryData.lastName || ""}`.trim();
+
+      document.getElementById("userName").textContent = fullName || "Not Available";
+      document.getElementById("userPhone").textContent = deliveryData.phone || "Not Available";
+      document.getElementById("userAddress").textContent = deliveryData.address || "Not Available";
+      document.getElementById(`payment-${orderId}`).textContent = deliveryData.paymentMethod || "Not Specified";
+    } else {
+      console.log(`No delivery details found for order: ${orderId}`);
+    }
+  } catch (error) {
+    console.error("Error loading delivery info:", error);
+  }
+}
+
+
+    async function loadOrderItems(userId, orderId) {
+      const itemsContainer = document.getElementById(`items-${orderId}`);
+      const itemsRef = collection(db, `Users/${userId}/Orders/${orderId}/OrderItems`);
+      const itemsSnapshot = await getDocs(itemsRef);
+      itemsSnapshot.forEach((itemDoc) => {
+        const item = itemDoc.data();
+        const listItem = document.createElement("li");
+        listItem.textContent = `${item.name} x${item.quantity} - ₹${item.total}`;
+        itemsContainer.appendChild(listItem);
+      });
+    }
+
+    window.toggleOrderDetails = function (orderId) {
+      const details = document.getElementById(orderId);
+      details.style.display = details.style.display === "none" ? "block" : "none";
+    };
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f7f7;
+      text-align: center;
+    }
+
+    .order-container {
+      background-color: white;
+      padding: 20px;
+      max-width: 600px;
+      margin: 40px auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: #c0392b;
+      /* Red theme */
+    }
+
+    .order-item {
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      background: #fff;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .order-header {
+      background: #e74c3c;
+      /* Red */
+      color: white;
+      padding: 10px;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      font-weight: bold;
+      border-radius: 5px;
+    }
+
+    .order-header:hover {
+      background: #c0392b;
+      /* Darker red */
+    }
+
+    .order-details {
+      display: none;
+      padding: 10px;
+      background: #f8f9fa;
+      border-top: 2px solid #e74c3c;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      text-align: left;
+    }
+
+    p {
+      text-align: left;
+      margin: 5px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="navbar"></div>
+  <div class="order-container">
+    <h1>Order Tracking</h1>
+    <p><strong>Name:</strong> <span id="userName"></span></p>
+    <p><strong>Your Email:</strong> <span id="userEmail"></span></p>
+    <p><strong>Phone:</strong> <span id="userPhone"></span></p>
+    <p><strong>Address:</strong> <span id="userAddress"></span></p>
+
+    <div id="ordersContainer"></div>
+  </div>
+
+</body>
+
+</html>

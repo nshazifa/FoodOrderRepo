@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FOMS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fdf6e3;
+      line-height: 1.6;
+    }
+
+    /* Navigation Bar */
+    .navbar {
+      background-color: #B22222;
+      padding: 12px 20px;
+      color: white;
+    }
+
+    /* Navbar Container */
+    .nav-container {
+      max-width: 1200px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    /* Logo */
+    .logo {
+      font-size: 22px;
+      font-weight: bold;
+      color: white;
+      text-decoration: none;
+    }
+
+    /* Navigation Menu */
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
+
+    .nav-menu li {
+      display: inline-block;
+    }
+
+    .nav-link {
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      padding: 8px 12px;
+      transition: color 0.3s;
+    }
+
+    .nav-link:hover {
+      color: white;
+      font-weight: 510;
+    }
+
+    /* Navigation Buttons (Sign In) */
+    .nav-buttons {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      position: relative;
+    }
+
+    /* Sign In Button */
+    .nav-buttons .btn {
+      background-color: white;
+      color: #B22222;
+      border: 2px solid white;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 8px 14px;
+      border-radius: 5px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .nav-buttons .btn:hover {
+      background-color: #B22222;
+      color: white;
+      border-color: white;
+    }
+
+    /* Hidden Login Form */
+    .login-form {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 0;
+      background: white;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      width: 250px;
+      z-index: 1000;
+    }
+
+    .login-form input {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .login-form button {
+      width: 100%;
+      background-color: #B22222;
+      color: white;
+      padding: 8px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .login-form button:hover {
+      background-color: #8B1A1A;
+    }
+
+    /* LANDING PAGE */
+    .landingpage {
+      display: flex;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .landingpage img {
+      min-width: 25%;
+      height: 100%;
+      object-fit: cover;
+      cursor: pointer;
+    }
+
+    .overlay-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 3vw;
+      text-align: center;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+      z-index: 2;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .features-section {
+      padding: 50px;
+      background: #fd5704;
+      text-align: center;
+    }
+
+    .features-section h1 {
+      margin-bottom: 20px;
+      font-size: 2rem;
+    }
+
+    .features-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+    }
+
+    .feature-box {
+      width: 250px;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .feature-box img {
+      width: 50px;
+      height: 50px;
+    }
+
+    /* Hide one image on smaller screens */
+    @media screen and (max-width: 768px) {
+      .landingpage img:nth-child(4) {
+        display: none;
+      }
+
+      .landingpage img:nth-child(3) {
+        display: none;
+      }
+
+      .landingpage img {
+        max-width: 100%;
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      .landingpage img:nth-child(2) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <!-- Left Side: Logo -->
+      <a href="#" class="logo">FoodOrder</a>
+
+      <!-- Right Side: Navigation Menu & Sign In -->
+      <div class="nav-buttons">
+        <ul class="nav-menu">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="admin.html" id="admin-link" class="nav-link">Admin</a></li>
+        </ul>
+
+        <!-- Login/Logout Button -->
+        <button id="toggle-login" class="btn">Login</button>
+      </div>
+    </div>
+
+    <!-- Hidden Login & Signup Form -->
+    <div id="login-form" class="login-form" style="display: none;">
+      <form id="login-section">
+        <input type="email" id="login-email" placeholder="Email" required>
+        <input type="password" id="login-password" placeholder="Password" required>
+        <button type="submit">Sign In</button>
+        <p>New User? <a href="#" id="show-signup">Create an Account</a></p>
+      </form>
+
+      <!-- Signup Section -->
+      <div id="signup-section" style="display: none;">
+        <input type="text" id="signup-username" placeholder="Username" required>
+        <input type="email" id="signup-email" placeholder="Email" required>
+        <input type="password" id="signup-password" placeholder="Password" required>
+        <button id="signup-btn">Create Account</button>
+        <p>Already have an account? <a href="#" id="show-login">Login</a></p>
+      </div>
+    </div>
+  </nav>
+
+  <div class="landingpage">
+    <img src="landingpage2.jpg" alt="Image 1">
+    <img src="landingpage1.jpg" alt="Image 2">
+    <img src="landingpage8.jpg" alt="Image 3">
+    <img src="landingpage7.jpg" alt="Image 4">
+    <div class="overlay-text">WELCOME TO FOMS!</div>
+  </div>
+  <script type="module" src="index.js"></script>
+  <script type="module" src="firebase-config.js"></script>
+ 
+ 
+</body>
+
+</html>
